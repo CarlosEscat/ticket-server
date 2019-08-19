@@ -2,6 +2,7 @@ const { Router } = require("express");
 const Ticket = require("./model");
 const router = new Router();
 
+//Get all tickets
 router.get("/ticket", (req, res, next) =>
   Ticket.findAll()
     .then(tickets => {
@@ -10,12 +11,14 @@ router.get("/ticket", (req, res, next) =>
     .catch(error => next(error))
 );
 
+//Add one ticket to database
 router.post("/ticket", (req, res, next) => {
   Ticket.create(req.body)
     .then(name => res.json(name))
     .catch(next);
 });
 
+//Get a ticket information by id
 router.get("/ticket/:Id", (req, res, next) => {
   Ticket.findByPk(req.params.Id)
     .then(ticket => {
@@ -28,6 +31,7 @@ router.get("/ticket/:Id", (req, res, next) => {
     .catch(next);
 });
 
+//Edit a ticket information by id
 router.put("/ticket/:Id", (req, res, next) => {
   Ticket.findByPk(req.params.Id)
     .then(ticket => {
@@ -39,6 +43,7 @@ router.put("/ticket/:Id", (req, res, next) => {
     .catch(next);
 });
 
+//Delete one ticket by id
 router.delete("/ticket/:Id", (req, res, next) => {
   Ticket.destroy({
     where: {
@@ -48,6 +53,92 @@ router.delete("/ticket/:Id", (req, res, next) => {
     .then(numDeleted => {
       if (numDeleted) {
         res.send({ numDeleted });
+      }
+      return res.status(404).end();
+    })
+    .catch(next);
+});
+
+//Get list of tickets from event id
+router.get("/event/:eventId/tickets", (req, res, next) => {
+  Ticket.findAll({ where: { eventId: req.params.eventId } })
+    .then(tickets => {
+      res.json(tickets);
+    })
+    .catch(next);
+});
+
+//Get a single ticket from an event
+router.get("/event/:eventId/tickets/:ticketId", (req, res, next) => {
+  Ticket.findOne({
+    where: {
+      id: req.params.ticketId,
+      eventId: req.params.eventId
+    }
+  })
+    .then(ticket => {
+      if (ticket) {
+        return res.json(ticket);
+      }
+      return res.status(404).end();
+    })
+    .catch(next);
+});
+
+//Get list of tickets from a user id
+router.get("/user/:userId/tickets", (req, res, next) => {
+  Ticket.findAll({ where: { userId: req.params.userId } })
+    .then(tickets => {
+      res.json(tickets);
+    })
+    .catch(next);
+});
+
+//Get a single ticket from a user
+router.get("/user/:userId/tickets/:ticketId", (req, res, next) => {
+  Ticket.findOne({
+    where: {
+      id: req.params.ticketId,
+      userId: req.params.userId
+    }
+  })
+    .then(ticket => {
+      if (ticket) {
+        return res.json(ticket);
+      }
+      return res.status(404).end();
+    })
+    .catch(next);
+});
+
+//Edit a users ticket by id
+router.put("/user/:userId/tickets/:ticketId", (req, res, next) => {
+  Ticket.findOne({
+    where: {
+      id: req.params.ticketId,
+      userId: req.params.userId
+    }
+  })
+    .then(ticket => {
+      if (ticket) {
+        return ticket.update(req.body).then(ticket => res.json(ticket));
+      }
+      return res.status(404).end();
+    })
+    .catch(next);
+});
+
+// Delete a user's ticket by id
+router.delete("/users/:userId/tickets/:ticketId", (req, res, next) => {
+  Ticket.destroy({
+    where: {
+      id: req.params.ticketId,
+      userId: req.params.userId
+    }
+  })
+    .then(numDeleted => {
+      if (numDeleted) {
+        return res.status(204).end();
       }
       return res.status(404).end();
     })

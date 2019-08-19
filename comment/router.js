@@ -39,6 +39,15 @@ router.put("/comment/:Id", (req, res, next) => {
     .catch(next);
 });
 
+//Get list of comments of a ticket id
+router.get("/ticket/:ticketId/comments", (req, res, next) => {
+  Comment.findAll({ where: { ticketId: req.params.ticketId } })
+    .then(comments => {
+      res.json(comments);
+    })
+    .catch(next);
+});
+
 router.delete("/comment/:Id", (req, res, next) => {
   Comment.destroy({
     where: {
