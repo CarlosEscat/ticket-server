@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const Ticket = require("./model");
+const User = require("../user/model");
 const router = new Router();
 
 //Get all tickets
@@ -81,6 +82,23 @@ router.get("/event/:eventId/tickets/:ticketId", (req, res, next) => {
         return res.json(ticket);
       }
       return res.status(404).end();
+    })
+    .catch(next);
+});
+
+//Create a new ticket by user id
+router.post("/users/:userId/tickets", (req, res, next) => {
+  User.findByPk(req.params.userId)
+    .then(user => {
+      if (!user) {
+        return res.status(404).end();
+      }
+      return Ticket.create({
+        ...req.body,
+        userId: req.params.userId
+      }).then(ticket => {
+        res.json(ticket);
+      });
     })
     .catch(next);
 });

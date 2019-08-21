@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const Event = require("./model");
+const User = require("../user/model");
 const router = new Router();
 
 //Get all Events
@@ -55,6 +56,22 @@ router.delete("/event/:Id", (req, res, next) => {
         res.send({ numDeleted });
       }
       return res.status(404).end();
+    })
+    .catch(next);
+});
+
+//Create a new event by user id
+router.post("/users/:userId/event", (req, res, next) => {
+  User.findByPk(req.params.userId)
+    .then(user => {
+      if (!user) {
+        return res.status(404).end();
+      }
+      return Event.create({
+        ...req.body
+      }).then(event => {
+        res.json(event);
+      });
     })
     .catch(next);
 });
