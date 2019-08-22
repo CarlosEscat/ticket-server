@@ -1,21 +1,46 @@
 const { Router } = require("express");
 const Event = require("./model");
+const User = require("../user/model");
+const auth = require("../auth/middleware");
 const router = new Router();
 
-router.get("/event", (req, res, next) =>
-  Event.findAll()
-    .then(events => {
-      return res.json({ events: events });
-    })
-    .catch(error => next(error))
-);
+// Get all Events
+// router.get("/event", (req, res, next) => {
+//   const limit = 9;
+//   const offset = 0;
 
+//   Event.findAll({
+//     limit,
+//     offset
+//   })
+//     .then(events => {
+//       return res.json({ events: events });
+//     })
+//     .catch(error => next(error));
+// });
+
+router.get("/event", (req, res, next) => {
+  const limit = req.query.limit || 4;
+  const offset = req.query.offset || 0;
+
+  Promise.all([Event.count(), Event.findAll({ limit, offset })])
+    .then(([total, events]) => {
+      res.send({
+        events,
+        total
+      });
+    })
+    .catch(error => next(error));
+});
+
+//Add one event to database
 router.post("/event", (req, res, next) => {
   Event.create(req.body)
     .then(name => res.json(name))
     .catch(next);
 });
 
+//Get one event by id
 router.get("/event/:Id", (req, res, next) => {
   Event.findByPk(req.params.Id)
     .then(event => {
@@ -28,6 +53,7 @@ router.get("/event/:Id", (req, res, next) => {
     .catch(next);
 });
 
+//Edit one event by id
 router.put("/event/:Id", (req, res, next) => {
   Event.findByPk(req.params.Id)
     .then(event => {
@@ -39,6 +65,7 @@ router.put("/event/:Id", (req, res, next) => {
     .catch(next);
 });
 
+//Delete one event by id
 router.delete("/event/:Id", (req, res, next) => {
   Event.destroy({
     where: {
@@ -50,6 +77,22 @@ router.delete("/event/:Id", (req, res, next) => {
         res.send({ numDeleted });
       }
       return res.status(404).end();
+    })
+    .catch(next);
+});
+
+//Create a new event by user id
+router.post("/users/:userId/event", (req, res, next) => {
+  User.findByPk(req.params.userId)
+    .then(user => {
+      if (!user) {
+        return res.status(404).end();
+      }
+      return Event.create({
+        ...req.body
+      }).then(event => {
+        res.json(event);
+      });
     })
     .catch(next);
 });

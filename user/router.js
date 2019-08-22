@@ -15,4 +15,12 @@ router.post("/user", (req, res, next) => {
   });
 });
 
+router.get("/user", (req, res, next) =>
+  User.findAll()
+    .then(users => {
+      return res.json({ users: users });
+    })
+    .catch(error => next(error))
+);
+
 module.exports = router;
