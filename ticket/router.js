@@ -50,10 +50,11 @@ router.put("/ticket/:Id", async (req, res, next) => {
   const { jwt, data } = req.body;
   console.log("**********************request.body.data test:", data);
   const { userId } = toData(jwt);
-  console.log("USERID TEST: ", userId);
   const user = await User.findByPk(userId);
   console.log("USER TEST: ", user.dataValues.id);
-  if (user.dataValues.id == userId) {
+  const ticId = data.userId;
+  console.log("TICKETID TEST: ", ticId);
+  if (user.dataValues.id === ticId) {
     console.log("++++++++++ENTERED++++++++");
     Ticket.findByPk(req.params.Id)
       .then(ticket => {
