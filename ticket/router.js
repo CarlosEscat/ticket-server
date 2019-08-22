@@ -1,6 +1,8 @@
 const { Router } = require("express");
 const Ticket = require("./model");
 const User = require("../user/model");
+const auth = require("../auth/middleware");
+const { toData } = require("../auth/jwt");
 const router = new Router();
 
 //Get all tickets
@@ -33,15 +35,37 @@ router.get("/ticket/:Id", (req, res, next) => {
 });
 
 //Edit a ticket information by id
-router.put("/ticket/:Id", (req, res, next) => {
-  Ticket.findByPk(req.params.Id)
-    .then(ticket => {
-      if (ticket) {
-        return ticket.update(req.body).then(ticket => res.json(ticket));
-      }
-      return res.status(404).end();
-    })
-    .catch(next);
+// router.put("/ticket/:Id", (req, res, next) => {
+//   Ticket.findByPk(req.params.Id)
+//     .then(ticket => {
+//       if (ticket) {
+//         return ticket.update(req.body).then(ticket => res.json(ticket));
+//       }
+//       return res.status(404).end();
+//     })
+//     .catch(next);
+// });
+
+router.put("/ticket/:Id", async (req, res, next) => {
+  const { jwt, data } = req.body;
+  console.log("**********************request.body.data test:", data);
+  const { userId } = toData(jwt);
+  console.log("USERID TEST: ", userId);
+  const user = await User.findByPk(userId);
+  console.log("USER TEST: ", user.dataValues.id);
+  if (user.dataValues.id == userId) {
+    console.log("++++++++++ENTERED++++++++");
+    Ticket.findByPk(req.params.Id)
+      .then(ticket => {
+        if (ticket) {
+          return ticket.update(data).then(ticket => res.json(ticket));
+        }
+        return res.status(404).end();
+      })
+      .catch(next);
+  } else {
+    return res.status(401).end();
+  }
 });
 
 //Delete one ticket by id

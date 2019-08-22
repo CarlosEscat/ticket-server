@@ -1,16 +1,37 @@
 const { Router } = require("express");
 const Event = require("./model");
 const User = require("../user/model");
+const auth = require("../auth/middleware");
 const router = new Router();
 
-//Get all Events
-router.get("/event", (req, res, next) =>
-  Event.findAll()
-    .then(events => {
-      return res.json({ events: events });
+// Get all Events
+// router.get("/event", (req, res, next) => {
+//   const limit = 9;
+//   const offset = 0;
+
+//   Event.findAll({
+//     limit,
+//     offset
+//   })
+//     .then(events => {
+//       return res.json({ events: events });
+//     })
+//     .catch(error => next(error));
+// });
+
+router.get("/event", (req, res, next) => {
+  const limit = req.query.limit || 4;
+  const offset = req.query.offset || 0;
+
+  Promise.all([Event.count(), Event.findAll({ limit, offset })])
+    .then(([total, events]) => {
+      res.send({
+        events,
+        total
+      });
     })
-    .catch(error => next(error))
-);
+    .catch(error => next(error));
+});
 
 //Add one event to database
 router.post("/event", (req, res, next) => {

@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const Comment = require("./model");
 const User = require("../user/model");
+const auth = require("../auth/middleware");
 const router = new Router();
 
 //Get all comments
