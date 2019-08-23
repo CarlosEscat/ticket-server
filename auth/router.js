@@ -10,7 +10,7 @@ router.post("/login", (req, res) => {
   const name = req.body.name;
   const password = req.body.password;
 
-  console.log("req.body test:", req.body);
+  //console.log("req.body test:", req.body);
 
   if (!name || !password) {
     res.status(400).send({
