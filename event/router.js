@@ -20,7 +20,7 @@ const router = new Router();
 // });
 
 router.get("/event", (req, res, next) => {
-  const limit = req.query.limit || 4;
+  const limit = req.query.limit || 20;
   const offset = req.query.offset || 0;
 
   Promise.all([Event.count(), Event.findAll({ limit, offset })])
@@ -34,8 +34,9 @@ router.get("/event", (req, res, next) => {
 });
 
 //Add one event to database
-router.post("/event", (req, res, next) => {
-  Event.create(req.body)
+router.post("/event", auth, (req, res, next) => {
+  console.log("DATA TEST: ", req.body.data);
+  Event.create(req.body.data)
     .then(name => res.json(name))
     .catch(next);
 });

@@ -1,8 +1,10 @@
 const { Router } = require("express");
 const Ticket = require("./model");
 const User = require("../user/model");
+const Comment = require("../comment/model");
 const auth = require("../auth/middleware");
 const { toData } = require("../auth/jwt");
+const risk = require("./risk");
 const router = new Router();
 
 //Get all tickets
@@ -23,6 +25,9 @@ router.post("/ticket", (req, res, next) => {
 
 //Get a ticket information by id
 router.get("/ticket/:Id", (req, res, next) => {
+  const ticketId = req.params.Id;
+  console.log("TICKETID TEST:", req.params.Id);
+  risk(ticketId);
   Ticket.findByPk(req.params.Id)
     .then(ticket => {
       if (!ticket) {

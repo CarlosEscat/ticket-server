@@ -2,16 +2,17 @@ const User = require("../user/model");
 const { toData } = require("./jwt");
 
 function auth(req, res, next) {
-  const auth =
-    req.headers.authorization && req.headers.authorization.split(" ");
-  if (auth && auth[0] === "Bearer" && auth[1]) {
+  const jwt = req.body.jwt;
+
+  console.log("TESTING JWT: ", jwt);
+  if (jwt) {
     try {
-      const data = toData(auth[1]);
+      const data = toData(jwt);
+
       User.findByPk(data.userId)
         .then(user => {
           if (!user) return next("User does not exist");
 
-          req.user = user;
           next();
         })
         .catch(next);
